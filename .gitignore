@@ -36,3 +36,5 @@ DRIFT_REPORT.md
 out.lean
 out.py
 certificate.json
+.builder_prompt.md
+.pytest_cache
