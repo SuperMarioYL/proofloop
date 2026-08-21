@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proofloop"
+version = "0.1.0"
+description = "Math-coding agent that emits code with machine-checkable Lean proof certificates."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [{ name = "SuperMarioYL" }]
+keywords = ["lean", "proof", "formal-methods", "agent", "llm", "mathematics", "verification"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "openai>=1.40",
+    "typer>=0.12",
+    "rich>=13.7",
+]
+
+[project.scripts]
+proofloop = "proofloop.cli:app"
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

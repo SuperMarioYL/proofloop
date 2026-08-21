@@ -1,0 +1,38 @@
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg
+.mypy_cache/
+.ruff_cache/
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/
+
+# build scratch — never ship
+.claude/
+CLAUDE.md
+.builder_*
+.build_metadata*
+.build_result.yaml
+_build_ctx.json
+.stage_*
+.spawn.*
+PUBLISH_BLOCKED.md
+BUILD_SETUP_NEXT_STEPS.md
+DRIFT_REPORT.md
+
+# runtime outputs (proofloop writes these per run)
+out.lean
+out.py
+certificate.json
