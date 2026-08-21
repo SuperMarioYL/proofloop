@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "proofloop",
+  "github": "https://github.com/SuperMarioYL/proofloop",
+  "host": "proofloop.lei6393.com",
+  "lang": { "primary": "zh", "toggle": true },
+  "accent": ["#c084fc", "#7c5cfc", "#5b7cfc"],
+  "hero": {
+    "eyebrow": { "zh": "数学 · 证明 · 可验证", "en": "Math · Proof · Verifiable" },
+    "headline": {
+      "zh": "模型说「已证明」\n谁来检查？",
+      "en": "The model says \"proved\"\nWho checks?"
+    },
+    "sub": {
+      "zh": "数学编程 agent 生成代码的同时附上 Lean 证明证书——证明不过就把类型错误喂回去迭代修复，直到类型检查通过。",
+      "en": "A math-coding agent that emits code with a Lean proof certificate — if the proof fails, the type error goes back for repair until it passes."
+    },
+    "command": "uvx proofloop prove \"n(n+1)/2\" --trace --stub"
+  },
+  "advantages": [
+    {
+      "title": { "zh": "Lean 当编译器，不是模型当裁判", "en": "Lean as the judge, not the model" },
+      "body": { "zh": "证明过不过由 Lean 类型检查器的退出码决定，不由模型自评。你可以随时自己 lean out.lean 复查，2 秒。", "en": "Proof passed or not is decided by the Lean type-checker exit code, not by the model. Re-check with lean out.lean yourself — 2 seconds." },
+      "chips": ["› lean exit 0 = pass", "› 非模型自评", "› 可独立复查"]
+    },
+    {
+      "title": { "zh": "起草→检查→修复，自动迭代", "en": "Draft → check → repair, automatically" },
+      "body": { "zh": "agent 同时起草 Python 实现 + Lean 4 证明，证明不过就把 Lean stderr 喂回模型重新起草，循环到通过或达上限。", "en": "The agent drafts Python code + a Lean 4 proof in one call. If the proof fails, the Lean stderr goes back to the model for a re-draft — loop until pass or cap." },
+      "chips": ["› co-iteration loop", "› stderr → repair", "› 上限保护"]
+    },
+    {
+      "title": { "zh": "附机器可检查的证书，不是散文", "en": "A machine-checkable certificate, not prose" },
+      "body": { "zh": "每次生成附带 certificate.json，proof_passed 字段由 lean 退出码决定。不信任模型，信任编译器。", "en": "Every run emits certificate.json with a proof_passed field set by the lean exit code. Don't trust the model — trust the compiler." },
+      "chips": ["› certificate.json", "› proof_passed: true/false", "› 不可伪造"]
+    },
+    {
+      "title": { "zh": "零配置先看一眼", "en": "Zero-config first look" },
+      "body": { "zh": "一条命令跑完整循环，无需 API key、无需装 Lean。要跑真实证明，装一次 Lean 4 + 任意 OpenAI 兼容 key 即可。", "en": "One command runs the full loop — no API key, no Lean install. For real proofs, install Lean 4 once + any OpenAI-compatible key." },
+      "chips": ["› --stub 演示模式", "› DeepSeek/GLM/Qwen 均可", "› uvx 一键运行"]
+    }
+  ],
+  "scene": { "kind": "orbit", "nodes": ["claim", "draft", "Lean check", "repair", "certificate"] },
+  "cta": {
+    "headline": { "zh": "别再信任似是而非的数学", "en": "Stop trusting plausible-looking math" },
+    "sub": { "zh": "一条命令，让 Lean 编译器替你检查证明。", "en": "One command — let the Lean compiler check the proof for you." },
+    "button": { "zh": "在 GitHub 查看", "en": "View on GitHub" }
+  },
+  "footer": { "tag": { "zh": "MIT 开源 · Lean 当编译器", "en": "MIT open source · Lean as the compiler" } },
+  "meta": { "content_version": 1, "generated_at": "2026-08-22T01:00:00Z" }
+}
