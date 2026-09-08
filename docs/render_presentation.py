@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """Construct portfolio SVG artwork from authored facts and the renderer palette."""
-import argparse,json,math,random,shutil,textwrap
-from pathlib import Path
+import argparse
+import json
+import math
+import random
+import shutil
+import textwrap
 from html import escape
+from pathlib import Path
+
 
 def local(value):
     return str(value.get('en') or value.get('zh') or '') if isinstance(value,dict) else str(value or '')
@@ -18,7 +24,7 @@ def render(repo):
     assert all(0<=int(e[0])<len(nodes) and 0<=int(e[1])<len(nodes) for e in edges)
     folder=repo/'assets/presentation';web=repo/'web/assets/presentation'
     folder.mkdir(parents=True,exist_ok=True);web.mkdir(parents=True,exist_ok=True)
-    for mode in ['dark','light']:
+    def render_mode(mode):
         p=palette[mode]
         def txt(x,y,s,size=20,color='ink',anchor='start',weight=400):
             return f'<text x="{x}" y="{y}" fill="{p[color]}" font-size="{size}" text-anchor="{anchor}" font-weight="{weight}">{escape(local(s))}</text>'
@@ -111,6 +117,8 @@ def render(repo):
             b=txt(36,44,f'DEMO / STEP {i+1:02}',13,'muted')+para(36,89,label,688,28,'ink',2)+para(36,148,body,688,19,'muted',3)
             b+=f'<path d="M36 236H724" stroke="{p["line"]}"/>'+para(36,272,step['command'],688,16,'primary',2)
             save(f'demo-{i}',760,330,name+' demo '+str(i+1),body,b)
+    for mode in ['dark','light']:
+        render_mode(mode)
     print(name, palette['id'], 'SVG groups generated')
 
 if __name__=='__main__':
