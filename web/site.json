@@ -1,50 +1,215 @@
 {
-  "schema": 1,
-  "name": "proofloop",
+  "schema": 3,
+  "name": "ProofLoop",
   "github": "https://github.com/SuperMarioYL/proofloop",
   "host": "proofloop.lei6393.com",
-  "lang": { "primary": "zh", "toggle": true },
-  "accent": ["#c084fc", "#7c5cfc", "#5b7cfc"],
+  "palette": "auto",
+  "lang": {
+    "primary": "en",
+    "toggle": true
+  },
+  "meta": {
+    "visual_style": "neon-particle",
+    "demo_source": "docs/demo-results.json"
+  },
   "hero": {
-    "eyebrow": { "zh": "数学 · 证明 · 可验证", "en": "Math · Proof · Verifiable" },
     "headline": {
-      "zh": "模型说「已证明」\n谁来检查？",
-      "en": "The model says \"proved\"\nWho checks?"
+      "en": "Keep the proof attempts beside the generated code.",
+      "zh": "把证明尝试与生成代码一起保留。"
     },
     "sub": {
-      "zh": "数学编程 agent 生成代码的同时附上 Lean 证明证书——证明不过就把类型错误喂回去迭代修复，直到类型检查通过。",
-      "en": "A math-coding agent that emits code with a Lean proof certificate — if the proof fails, the type error goes back for repair until it passes."
+      "en": "ProofLoop asks a configured model for Python and Lean drafts, feeds checker errors back for repair, and saves the final sources with a record of each attempt.",
+      "zh": "ProofLoop 向配置的模型请求 Python 与 Lean 草稿，将检查器错误反馈用于修订，最后保存源文件及每次尝试记录。"
     },
-    "command": "uvx proofloop prove \"n(n+1)/2\" --trace --stub"
+    "href": "#quickstart"
   },
   "advantages": [
     {
-      "title": { "zh": "Lean 当编译器，不是模型当裁判", "en": "Lean as the judge, not the model" },
-      "body": { "zh": "证明过不过由 Lean 类型检查器的退出码决定，不由模型自评。你可以随时自己 lean out.lean 复查，2 秒。", "en": "Proof passed or not is decided by the Lean type-checker exit code, not by the model. Re-check with lean out.lean yourself — 2 seconds." },
-      "chips": ["› lean exit 0 = pass", "› 非模型自评", "› 可独立复查"]
+      "title": {
+        "en": "Trace the repair",
+        "zh": "追踪修订"
+      },
+      "body": {
+        "en": "Each attempt keeps its draft and checker error.",
+        "zh": "每次尝试保留草稿与检查器错误。"
+      }
     },
     {
-      "title": { "zh": "起草→检查→修复，自动迭代", "en": "Draft → check → repair, automatically" },
-      "body": { "zh": "agent 同时起草 Python 实现 + Lean 4 证明，证明不过就把 Lean stderr 喂回模型重新起草，循环到通过或达上限。", "en": "The agent drafts Python code + a Lean 4 proof in one call. If the proof fails, the Lean stderr goes back to the model for a re-draft — loop until pass or cap." },
-      "chips": ["› co-iteration loop", "› stderr → repair", "› 上限保护"]
+      "title": {
+        "en": "Retain proof source",
+        "zh": "保留证明源"
+      },
+      "body": {
+        "en": "out.lean is available for independent checking.",
+        "zh": "可对 out.lean 独立检查。"
+      }
     },
     {
-      "title": { "zh": "附机器可检查的证书，不是散文", "en": "A machine-checkable certificate, not prose" },
-      "body": { "zh": "每次生成附带 certificate.json，proof_passed 字段由 lean 退出码决定。不信任模型，信任编译器。", "en": "Every run emits certificate.json with a proof_passed field set by the lean exit code. Don't trust the model — trust the compiler." },
-      "chips": ["› certificate.json", "› proof_passed: true/false", "› 不可伪造"]
-    },
-    {
-      "title": { "zh": "零配置先看一眼", "en": "Zero-config first look" },
-      "body": { "zh": "一条命令跑完整循环，无需 API key、无需装 Lean。要跑真实证明，装一次 Lean 4 + 任意 OpenAI 兼容 key 即可。", "en": "One command runs the full loop — no API key, no Lean install. For real proofs, install Lean 4 once + any OpenAI-compatible key." },
-      "chips": ["› --stub 演示模式", "› DeepSeek/GLM/Qwen 均可", "› uvx 一键运行"]
+      "title": {
+        "en": "Separate demo from real checks",
+        "zh": "区分示例与真实检查"
+      },
+      "body": {
+        "en": "Model and checker labels remain in the certificate.",
+        "zh": "证书保留模型与检查器标签。"
+      }
     }
   ],
-  "scene": { "kind": "orbit", "nodes": ["claim", "draft", "Lean check", "repair", "certificate"] },
-  "cta": {
-    "headline": { "zh": "别再信任似是而非的数学", "en": "Stop trusting plausible-looking math" },
-    "sub": { "zh": "一条命令，让 Lean 编译器替你检查证明。", "en": "One command — let the Lean compiler check the proof for you." },
-    "button": { "zh": "在 GitHub 查看", "en": "View on GitHub" }
+  "demo": {
+    "title": {
+      "en": "Run it on a complete example",
+      "zh": "运行完整示例"
+    },
+    "note": {
+      "en": "Python 3.12+; the included driver reads the three artifacts from a complete stub run in a temporary directory.",
+      "zh": "需要 Python 3.12+；随仓驱动在临时目录完成一次 stub 运行，并回读三个产物。"
+    },
+    "source": "https://github.com/SuperMarioYL/proofloop/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": "Recorded run",
+        "body": "Canned draft/repair loop with DemoBackend and DemoLeanChecker, followed by artifact readback. It is not a real Lean check or model-generated proof.",
+        "command": "python3 examples/presentation_demo.py",
+        "output": "{\n  \"model\": \"demo (stub)\",\n  \"checker\": \"lean 4 (stub)\",\n  \"simulated_proof_passed\": true,\n  \"iteration_results\": [\n    false,\n    true\n  ],\n  \"files\": [\n    \"certificate.json\",\n    \"out.lean\",\n    \"out.py\"\n  ]\n}",
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg"
+      }
+    ]
   },
-  "footer": { "tag": { "zh": "MIT 开源 · Lean 当编译器", "en": "MIT open source · Lean as the compiler" } },
-  "meta": { "content_version": 1, "generated_at": "2026-08-22T01:00:00Z" }
+  "quickstart": {
+    "title": {
+      "en": "Try it locally",
+      "zh": "本地上手"
+    },
+    "body": {
+      "en": "Python 3.12+; the included driver reads the three artifacts from a complete stub run in a temporary directory.",
+      "zh": "需要 Python 3.12+；随仓驱动在临时目录完成一次 stub 运行，并回读三个产物。"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Install from source",
+          "zh": "从源码安装"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/proofloop.git\ncd proofloop\npython3.12 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -e ."
+      },
+      {
+        "title": {
+          "en": "Run the included example",
+          "zh": "运行随仓示例"
+        },
+        "code": "python3 examples/presentation_demo.py"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "en": "The demo checker passes any draft without sorry/admit. Its proof_passed flag is simulated and is not formal verification.",
+      "zh": "示例检查器会放行不含 sorry/admit 的草稿，其 proof_passed 是模拟结果，不代表形式化验证。"
+    },
+    {
+      "en": "Even a real Lean acceptance checks the Lean statement, not equivalence of the Python program or fidelity to the natural-language claim. Review theorem assumptions and generated code.",
+      "zh": "即使真实 Lean 接受，也只检查 Lean 命题，不证明 Python 程序等价或自然语言需求被忠实表达；须检查定理假设与生成代码。"
+    },
+    {
+      "en": "The CLI writes a certificate on exhaustion and does not necessarily return a nonzero status for an unproved claim. Inspect proof_passed, model and lean_version.",
+      "zh": "迭代耗尽后 CLI 仍写证书，未证明的命题不一定导致非零退出；应检查 proof_passed、model 与 lean_version。"
+    }
+  ],
+  "scene": {
+    "kind": "neon-graph",
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg"
+  },
+  "story": {
+    "intro": {
+      "title": {
+        "en": "A concrete task",
+        "zh": "从实际任务出发"
+      },
+      "body": {
+        "en": "A final answer hides how a proof was obtained and which check accepted it. Keeping draft, error and repair together makes the run inspectable and gives you the Lean source for independent checking.",
+        "zh": "最终回答容易隐藏证明如何得到、被哪个检查器接受。把草稿、错误与修订保存在一起，便于检查过程，也能拿 Lean 源文件独立验证。"
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "en": "Follow the operation",
+          "zh": "处理过程"
+        },
+        "body": {
+          "en": "The CLI resolves the model and checker. co_iterate parses fenced Python/Lean drafts, invokes the checker and asks for repair until success or the iteration cap. emit writes out.py, out.lean and certificate.json. --stub replaces both model and checker with bundled stand-ins.",
+          "zh": "CLI 解析模型与检查器配置；co_iterate 从代码块读取 Python/Lean 草稿，调用检查器并请求修订，直至通过或达到次数上限。emit 写入 out.py、out.lean 与 certificate.json；--stub 将模型和检查器均替换为随仓模拟实现。"
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "en": "Follow the operation",
+            "zh": "处理过程"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "Inside ProofLoop",
+          "zh": "ProofLoop 的内部流程"
+        },
+        "body": {
+          "en": "The CLI resolves the model and checker. co_iterate parses fenced Python/Lean drafts, invokes the checker and asks for repair until success or the iteration cap. emit writes out.py, out.lean and certificate.json. --stub replaces both model and checker with bundled stand-ins.",
+          "zh": "CLI 解析模型与检查器配置；co_iterate 从代码块读取 Python/Lean 草稿，调用检查器并请求修订，直至通过或达到次数上限。emit 写入 out.py、out.lean 与 certificate.json；--stub 将模型和检查器均替换为随仓模拟实现。"
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "en": "Inside ProofLoop",
+            "zh": "ProofLoop 的内部流程"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "Connect the pieces",
+          "zh": "输入与输出"
+        },
+        "body": {
+          "en": "Choose the input and output route that matches your workflow. The local example below exercises the stated subset.",
+          "zh": "根据工作流选择输入与输出路径。本文本地示例验证其中明确说明的子流程。"
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "en": "Connect the pieces",
+            "zh": "输入与输出"
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "en": "Configuration",
+          "zh": "配置"
+        },
+        "body": {
+          "en": "Set PROOFLOOP_API_KEY (or OPENAI_API_KEY), PROOFLOOP_BASE_URL, PROOFLOOP_MODEL and PROOFLOOP_LEAN for the real path; --base-url, --model and --lean override them. Use explicit --max-iter and --out-dir: the current CLI defaults can take precedence over their environment settings. The real checker rejects sorry/admit text before invoking Lean and has a subprocess timeout. --stub needs neither key nor Lean.",
+          "zh": "真实路径设置 PROOFLOOP_API_KEY（或 OPENAI_API_KEY）、PROOFLOOP_BASE_URL、PROOFLOOP_MODEL 与 PROOFLOOP_LEAN；--base-url、--model、--lean 可覆盖。次数与输出目录应显式用 --max-iter、--out-dir，当前 CLI 默认值可能优先于对应环境配置。真实检查器先拒绝 sorry/admit 文本，再调用带超时的 Lean 子进程；--stub 无需密钥或 Lean。"
+        }
+      },
+      {
+        "title": {
+          "en": "Further use",
+          "zh": "进一步使用"
+        },
+        "body": {
+          "en": "Run these commands from the repository root after installation. Replace paths for your own data.",
+          "zh": "安装后在仓库根目录运行以下命令；处理自己的数据时替换相应路径。"
+        },
+        "code": "proofloop prove \"sum of the first n natural numbers\" --stub --trace --out-dir demo-output\n# With a configured API key and Lean executable:\nproofloop prove \"sum of the first n natural numbers\" --trace --max-iter 8 --out-dir proof-output"
+      }
+    ]
+  }
 }

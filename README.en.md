@@ -1,126 +1,133 @@
-<div align="right"><sub><b>EN</b>&nbsp;&nbsp;⇄&nbsp;&nbsp;<a href="./README.md">中文</a></sub></div>
+[简体中文](./README.md) · [Website](https://proofloop.lei6393.com) · [GitHub](https://github.com/SuperMarioYL/proofloop)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/hero-light.svg">
-  <img src="./assets/hero-light.svg" width="880" alt="ProofLoop — a math-coding agent that emits machine-checkable Lean proof certificates">
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/hero-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/hero-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/hero-dark.svg">
+  <img src="./assets/presentation/hero-light.svg" width="960" alt="Hero diagram">
 </picture>
 
-<p align="center"><sub>The math-coding agent for mathematicians — it emits code together with a machine-checkable Lean proof certificate.</sub></p>
+# ProofLoop
 
-<p align="center"><b>When the model says “proved” — who checks? ProofLoop treats Lean as a compiler: if the proof won’t type-check, it feeds the type error back to the agent and iterates until it does — attaching a machine-checkable certificate, not prose you have to trust.</b></p>
+**Keep the proof attempts beside the generated code.**
 
-<p align="center">
-  <a href="./LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <img alt="release" src="https://img.shields.io/github/v/release/SuperMarioYL/proofloop?label=release">
-  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/SuperMarioYL/proofloop/ci.yml?branch=main&label=CI">
-  <img alt="python" src="https://img.shields.io/badge/python-3.12-blue.svg">
-</p>
+ProofLoop asks a configured model for Python and Lean drafts, feeds checker errors back for repair, and saves the final sources with a record of each attempt.
 
-<h2><img src="https://api.iconify.design/tabler:topology-star-3.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Architecture</h2>
+## Why use it
+
+A final answer hides how a proof was obtained and which check accepted it. Keeping draft, error and repair together makes the run inspectable and gives you the Lean source for independent checking.
+
+- **Trace the repair** — Each attempt keeps its draft and checker error.
+- **Retain proof source** — out.lean is available for independent checking.
+- **Separate demo from real checks** — Model and checker labels remain in the certificate.
+
+## Architecture
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/atlas-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/atlas-light.svg">
-  <img src="./assets/atlas-light.svg" width="880" alt="Architecture: User CLI → Agent drafts code+Lean proof → Lean oracle type-checks → on failure feeds the error back and re-drafts → on pass emits a certificate">
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/architecture-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/architecture-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/architecture-dark.svg">
+  <img src="./assets/presentation/architecture-light.svg" width="960" alt="Architecture diagram">
 </picture>
 
-One Python process, two external dependencies: an OpenAI-compatible LLM endpoint and a Lean toolchain subprocess. No services, no daemons. `proofloop prove "<claim>"` has the agent draft **a Python implementation and a Lean 4 proof in one shot**, hands the proof to `lean` for type-checking — on success it emits a certificate, on failure it feeds Lean’s `stderr` back to the model for another draft, looping until it passes or the budget runs out. `proof_passed: true` is asserted only when `lean` exits 0.
+The CLI resolves the model and checker. co_iterate parses fenced Python/Lean drafts, invokes the checker and asks for repair until success or the iteration cap. emit writes out.py, out.lean and certificate.json. --stub replaces both model and checker with bundled stand-ins.
 
-<h2><img src="https://api.iconify.design/tabler:bulb.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Why this exists</h2>
+| Component | Responsibility |
+| --- | --- |
+| `Claim + configuration` | src/proofloop/cli.py |
+| `Draft / repair loop` | src/proofloop/agent.py |
+| `Lean checker` | src/proofloop/lean.py |
+| `Certificate files` | src/proofloop/certificate.py |
 
-Mathematicians and scientific-computing engineers who ask a general-purpose coding agent to write a numerical or symbolic routine get back plausible-looking code plus a prose “proof” — with no mechanism to tell correct derivation from hallucination. A general agent optimizes for breadth and natural-language plausibility; bolting on a Lean co-iteration loop has no value for its 95% of non-math users, and the failure mode (plausible-but-wrong math) is invisible to non-experts, so it never gets the signal to prioritize it.
+## Install and quickstart
 
-ProofLoop turns that trust question into a mechanically decidable fact: the agent drafts a Lean proof, the Lean type-checker is the ground-truth oracle, and on failure it iterates. `proof_passed` in `certificate.json` is decided by `lean`’s exit code, never by the model grading itself — you can re-run `lean out.lean` yourself in two seconds.
-
-> Contents: [Architecture](#architecture) · [Why this exists](#why-this-exists) · [Quickstart](#quickstart) · [Usage](#usage) · [Demo](#demo) · [Configuration](#configuration) · [Roadmap](#roadmap) · [License](#license)
-
-<h2><img src="https://api.iconify.design/tabler:rocket.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Quickstart</h2>
-
-Try the full co-iteration loop with zero config (no API key, no Lean):
-
-```bash
-uvx proofloop prove "sum of first n naturals = n(n+1)/2" --trace --stub
-```
-
-To run real proofs, install Lean 4 once and provide any OpenAI-compatible key (DeepSeek / GLM / Qwen / OpenAI all work):
+Use the runtime version declared in the repository manifest. The source installation below makes the included example reproducible.
 
 ```bash
-elan default 4.10                # one-time Lean 4 toolchain (skip if installed)
-export PROOFLOOP_API_KEY=sk-...  # any OpenAI-compatible key
-proofloop prove "sum of first n naturals = n(n+1)/2" --trace
+git clone https://github.com/SuperMarioYL/proofloop.git
+cd proofloop
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
 ```
 
-Both paths write `out.lean` (passes Lean), `out.py`, and `certificate.json` into the current directory.
+Python 3.12+; the included driver reads the three artifacts from a complete stub run in a temporary directory.
 
-<details>
-<summary>Sample output (<code>--trace --stub</code>, converges in 2 iterations)</summary>
+```bash
+python3 examples/presentation_demo.py
+```
 
-```json
+## Recorded demo
+
+<picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/process-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/process-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/process-dark.svg">
+  <img src="./assets/presentation/process-light.svg" width="960" alt="Process diagram">
+</picture>
+
+The stub records a rejected attempt followed by simulated acceptance, and writes out.py, out.lean and certificate.json.
+
+```text
 {
-  "claim": "sum of first n naturals = n(n+1)/2",
-  "proof_passed": true,
-  "lean_version": "lean 4 (stub)",
-  "checked_at": "2026-08-21T20:04:01+00:00",
-  "iterations": [
-    { "lean_ok": false, "lean_stderr": "error: 'sorry' is not allowed — admitted goals are not proofs" },
-    { "lean_ok": true,  "lean_stderr": "" }
+  "model": "demo (stub)",
+  "checker": "lean 4 (stub)",
+  "simulated_proof_passed": true,
+  "iteration_results": [
+    false,
+    true
+  ],
+  "files": [
+    "certificate.json",
+    "out.lean",
+    "out.py"
   ]
 }
 ```
-</details>
 
-<h2><img src="https://api.iconify.design/tabler:terminal-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Usage</h2>
+The complete command and output are recorded in [docs/demo-results.json](./docs/demo-results.json). Inputs and reproduction code are included in the repository.
+
+## Usage
+
+Run these commands from the repository root after installation. Replace paths for your own data.
 
 ```bash
-# Real path: real LLM + real Lean; --trace renders every draft → error → repair step
-proofloop prove "the sum of the first n naturals is n(n+1)/2" --trace
-
-# Offline taste of the loop shape (bundled example, no key / no Lean)
-proofloop prove "the sum of the first n naturals is n(n+1)/2" --trace --stub
-
-# Pick the output directory and the iteration budget
-proofloop prove "for all n, 2 * sumTo n = n*(n+1)" --out-dir proofs/ --max-iter 12
-
-# Switch to DeepSeek: just change the endpoint and model
-PROOFLOOP_BASE_URL=https://api.deepseek.com/v1 \
-PROOFLOOP_MODEL=deepseek-chat \
-proofloop prove "sum of first n naturals = n(n+1)/2" --trace
+proofloop prove "sum of the first n natural numbers" --stub --trace --out-dir demo-output
+# With a configured API key and Lean executable:
+proofloop prove "sum of the first n natural numbers" --trace --max-iter 8 --out-dir proof-output
 ```
 
-A full worked example lives in [`examples/`](./examples) (`sum_naturals.lean` + `sum_naturals.py`: the Lean proof and the Python implementation of the same claim).
+## Configuration
 
-<h2><img src="https://api.iconify.design/tabler:photo.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Demo</h2>
+Set PROOFLOOP_API_KEY (or OPENAI_API_KEY), PROOFLOOP_BASE_URL, PROOFLOOP_MODEL and PROOFLOOP_LEAN for the real path; --base-url, --model and --lean override them. Use explicit --max-iter and --out-dir: the current CLI defaults can take precedence over their environment settings. The real checker rejects sorry/admit text before invoking Lean and has a subprocess timeout. --stub needs neither key nor Lean.
 
-![demo](./assets/demo-trace.gif)
+## Integrations and responsibilities
 
-Above is the `--stub` path: draft (with `sorry`) → Lean rejects → the `stderr` is fed back to the agent for a re-draft → type-checks → `certificate.json` shows `proof_passed: true`. `docs/demo.tape` is the [vhs](https://github.com/charmbracelet/vhs) script of that session; `.github/workflows/demo.yml` re-renders the real binary via vhs on demand.
+<picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/integrations-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/integrations-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/integrations-dark.svg">
+  <img src="./assets/presentation/integrations-light.svg" width="960" alt="Integrations diagram">
+</picture>
 
-<h2><img src="https://api.iconify.design/tabler:adjustments.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Configuration</h2>
+Choose the input and output route that matches your workflow. The local example below exercises the stated subset.
 
-Everything is configured via environment variables (CLI flags `--model` / `--base-url` / `--lean` override them):
+| Route | Implemented role |
+| --- | --- |
+| OpenAI-compatible API | Configured draft generation |
+| Lean 4 executable | Real type-checking path |
+| Stub backends | Offline workflow demonstration |
+| Python / Lean files | Final generated sources |
+| JSON certificate | Claim, checker and iteration record |
 
-| Variable | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `PROOFLOOP_API_KEY` | str | — | OpenAI-compatible API key (falls back to `OPENAI_API_KEY`) |
-| `PROOFLOOP_BASE_URL` | str | `https://api.openai.com/v1` | LLM endpoint (change for DeepSeek/GLM/Qwen) |
-| `PROOFLOOP_MODEL` | str | `gpt-4o-mini` | Model name |
-| `PROOFLOOP_LEAN` | str | `lean` | Path to the `lean` binary (set explicitly if not on PATH) |
-| `PROOFLOOP_MAX_ITER` | int | `8` | Co-iteration attempt cap |
-| `PROOFLOOP_OUT_DIR` | str | `.` | Output directory for `out.lean` / `out.py` / `certificate.json` |
+## Limits and next steps
 
-<h2><img src="https://api.iconify.design/tabler:map-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Roadmap</h2>
+- The demo checker passes any draft without sorry/admit. Its proof_passed flag is simulated and is not formal verification.
+- Even a real Lean acceptance checks the Lean statement, not equivalence of the Python program or fidelity to the natural-language claim. Review theorem assumptions and generated code.
+- The CLI writes a certificate on exhaustion and does not necessarily return a nonzero status for an unproved claim. Inspect proof_passed, model and lean_version.
 
-- [x] **m1 — CLI**: `proofloop prove` co-iterates against Lean as the oracle until the proof type-checks, emitting `out.lean` / `out.py` / `certificate.json`; `--trace` renders each step.
-- [ ] **m2 — hosted playground**: in-browser WASM Lean (lean4web), a 10-minute no-install demo with a shareable URL embedding the trace + certificate.
-- [ ] **m3 — example library + convergence benchmark**: 10-20 curated classic theorems (induction basics, divisibility, small analysis) with known-good proofs + a success-rate / mean-iterations leaderboard.
+Stronger code-to-theorem linkage, broader theorem fixtures and separately verified Lean environments remain useful next steps.
 
-v0.1 is a single linear retry loop only: no proof-search tree, no auto-formalization of arbitrary natural-language theorems, no formally-verified code↔proof bridge (the link is the shared claim). Full scope is in the repo issues.
+## License and contributions
 
-<h2><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> License</h2>
-
-MIT — see [LICENSE](./LICENSE). File bugs or claims you’d like to try in Issues; PRs should stay within the m1 scope.
-
-> After pushing, set repo topics: `gh repo edit --add-topic lean --add-topic proof --add-topic formal-methods --add-topic agent`
-
-<p align="center"><sub><a href="./LICENSE">MIT</a> © 2026 SuperMarioYL</sub></p>
+See [LICENSE](./LICENSE). When reporting an issue, include a minimal input, the command, and the observed output.

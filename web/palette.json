@@ -1,0 +1,38 @@
+{
+  "mode": "auto",
+  "id": "ace656-72e76a-f3f6ac-880d3a249f7a",
+  "identity": "https://github.com/supermarioyl/proofloop",
+  "primary": "#ace656",
+  "secondary": "#72e76a",
+  "highlight": "#f3f6ac",
+  "dark": {
+    "bg": "#080c0d",
+    "panel": "#101717",
+    "code": "#101713",
+    "ink": "#fdfdee",
+    "muted": "#a6b9a8",
+    "line": "#2c3c1d",
+    "primary": "#ace656",
+    "secondary": "#72e76a",
+    "highlight": "#f3f6ac",
+    "accent": "#ace656",
+    "buttonStart": "#608030",
+    "buttonEnd": "#42853d",
+    "buttonText": "#ffffff"
+  },
+  "light": {
+    "bg": "#fcfef9",
+    "panel": "#fbfef7",
+    "code": "#f9fdf3",
+    "ink": "#1f2a1c",
+    "muted": "#65796a",
+    "line": "#e6f7cb",
+    "primary": "#5f7e2f",
+    "secondary": "#40823c",
+    "highlight": "#757753",
+    "accent": "#5f7e2f",
+    "buttonStart": "#608030",
+    "buttonEnd": "#42853d",
+    "buttonText": "#ffffff"
+  }
+}

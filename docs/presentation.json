@@ -1,0 +1,82 @@
+{
+  "name": "ProofLoop",
+  "tagline": "Keep the proof attempts beside the generated code.",
+  "architecture": {
+    "title": "Inside ProofLoop",
+    "nodes": [
+      {
+        "title": "Claim + configuration",
+        "detail": "src/proofloop/cli.py"
+      },
+      {
+        "title": "Draft / repair loop",
+        "detail": "src/proofloop/agent.py"
+      },
+      {
+        "title": "Lean checker",
+        "detail": "src/proofloop/lean.py"
+      },
+      {
+        "title": "Certificate files",
+        "detail": "src/proofloop/certificate.py"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ]
+  },
+  "process": {
+    "title": "From input to a useful result",
+    "steps": [
+      {
+        "title": "Generate canned draft",
+        "detail": "Contains an admitted goal"
+      },
+      {
+        "title": "Reject then repair",
+        "detail": "Stub policy loop"
+      },
+      {
+        "title": "Read artifacts",
+        "detail": "Two sources and JSON record"
+      }
+    ],
+    "result": "The stub records a rejected attempt followed by simulated acceptance, and writes out.py, out.lean and certificate.json."
+  },
+  "integrations": {
+    "title": "Supported input and output routes",
+    "items": [
+      {
+        "title": "OpenAI-compatible API",
+        "detail": "Configured draft generation"
+      },
+      {
+        "title": "Lean 4 executable",
+        "detail": "Real type-checking path"
+      },
+      {
+        "title": "Stub backends",
+        "detail": "Offline workflow demonstration"
+      },
+      {
+        "title": "Python / Lean files",
+        "detail": "Final generated sources"
+      },
+      {
+        "title": "JSON certificate",
+        "detail": "Claim, checker and iteration record"
+      }
+    ]
+  }
+}

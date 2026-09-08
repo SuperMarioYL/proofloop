@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "source_revision": "7bafde4053ef8670e3574be4c2d6bea945e80382",
+  "scope": "Canned draft/repair loop with DemoBackend and DemoLeanChecker, followed by artifact readback. It is not a real Lean check or model-generated proof.",
+  "steps": [
+    {
+      "label": "Recorded run",
+      "body": "Canned draft/repair loop with DemoBackend and DemoLeanChecker, followed by artifact readback. It is not a real Lean check or model-generated proof.",
+      "command": "python3 examples/presentation_demo.py",
+      "output": "{\n  \"model\": \"demo (stub)\",\n  \"checker\": \"lean 4 (stub)\",\n  \"simulated_proof_passed\": true,\n  \"iteration_results\": [\n    false,\n    true\n  ],\n  \"files\": [\n    \"certificate.json\",\n    \"out.lean\",\n    \"out.py\"\n  ]\n}"
+    }
+  ]
+}
