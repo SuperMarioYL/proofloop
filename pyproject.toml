@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "proofloop"
-version = "0.1.0"
+version = "0.2.0"
 description = "Iterate generated Lean proof drafts against a checker and retain Python code, Lean source and the per-attempt record in a JSON certificate."
 readme = "README.md"
 license = { text = "MIT" }

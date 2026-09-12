@@ -39,7 +39,9 @@ class LeanChecker:
     """Real Lean 4 checker via the ``lean`` binary (managed by ``elan``)."""
 
     def __init__(self, lean_path: str = "lean") -> None:
-        self._lean_path = lean_path
+        # Expand ~ so PROOFLOOP_LEAN=~/... / --lean ~/... find the binary
+        # (shutil.which does not expand the tilde itself).
+        self._lean_path = str(Path(lean_path).expanduser())
         self._version: str | None = None
 
     def check(self, proof: str) -> LeanResult:

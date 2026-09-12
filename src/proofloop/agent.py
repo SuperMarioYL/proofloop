@@ -79,7 +79,10 @@ def co_iterate(
 
     On success the returned certificate has ``proof_passed=True`` (asserted
     *only* because the oracle returned ``ok``). On exhaustion the certificate
-    still records every attempt so the user can see what failed.
+    still records every attempt so the user can see what failed. An oracle
+    that could not run at all (``available=False``, e.g. lean missing) is
+    terminal — a repair cannot install a toolchain — so the loop stops after
+    recording that attempt instead of burning the budget on repairs.
     """
     iterations: list[Iteration] = []
 
@@ -91,7 +94,7 @@ def co_iterate(
         on_step(1, draft, result)
 
     steps = 1
-    while not result.ok and steps < max_iterations:
+    while not result.ok and result.available and steps < max_iterations:
         raw = llm.repair(draft, result.stderr)
         draft = parse_draft(raw)
         result = lean.check(draft.proof)

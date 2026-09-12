@@ -85,7 +85,9 @@ def emit(cert: ProofCertificate, out_dir: str = ".") -> tuple[Path, Path, Path]:
 
     Returns the three written paths so the CLI can report them.
     """
-    base = Path(out_dir)
+    # Expand ~ so --out-dir '~/proofs' writes into the user's home instead of
+    # creating a literal './~' directory next to the CWD.
+    base = Path(out_dir).expanduser()
     base.mkdir(parents=True, exist_ok=True)
     lean_path = base / "out.lean"
     py_path = base / "out.py"

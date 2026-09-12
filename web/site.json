@@ -11,7 +11,7 @@
   "meta": {
     "visual_style": "neon-particle",
     "demo_source": "docs/demo-results.json",
-    "content_version": 1
+    "content_version": "0.2.0"
   },
   "hero": {
     "headline": {
@@ -87,6 +87,13 @@
       "zh": "需要 Python 3.12+；随仓驱动在临时目录完成一次 stub 运行，并回读三个产物。"
     },
     "steps": [
+      {
+        "title": {
+          "en": "Zero-config try (no key, no Lean)",
+          "zh": "零配置试用（无需 key、无需 Lean）"
+        },
+        "code": "uvx --from git+https://github.com/SuperMarioYL/proofloop proofloop prove \"sum of the first n naturals = n(n+1)/2\" --trace --stub"
+      },
       {
         "title": {
           "en": "Install from source",
@@ -208,8 +215,8 @@
           "zh": "配置"
         },
         "body": {
-          "en": "Set PROOFLOOP_API_KEY (or OPENAI_API_KEY), PROOFLOOP_BASE_URL, PROOFLOOP_MODEL and PROOFLOOP_LEAN for the real path; --base-url, --model and --lean override them. Use explicit --max-iter and --out-dir: the current CLI defaults can take precedence over their environment settings. The real checker rejects sorry/admit text before invoking Lean and has a subprocess timeout. --stub needs neither key nor Lean.",
-          "zh": "真实路径设置 PROOFLOOP_API_KEY（或 OPENAI_API_KEY）、PROOFLOOP_BASE_URL、PROOFLOOP_MODEL 与 PROOFLOOP_LEAN；--base-url、--model、--lean 可覆盖。次数与输出目录应显式用 --max-iter、--out-dir，当前 CLI 默认值可能优先于对应环境配置。真实检查器先拒绝 sorry/admit 文本，再调用带超时的 Lean 子进程；--stub 无需密钥或 Lean。"
+          "en": "Set PROOFLOOP_API_KEY (or OPENAI_API_KEY), PROOFLOOP_BASE_URL, PROOFLOOP_MODEL, PROOFLOOP_MAX_ITER and PROOFLOOP_OUT_DIR for the real path; --base-url, --model, --lean, --max-iter and --out-dir override them. The real checker rejects sorry/admit text before invoking Lean and has a subprocess timeout. --stub needs neither key nor Lean.",
+          "zh": "真实路径设置 PROOFLOOP_API_KEY（或 OPENAI_API_KEY）、PROOFLOOP_BASE_URL、PROOFLOOP_MODEL、PROOFLOOP_MAX_ITER 与 PROOFLOOP_OUT_DIR；--base-url、--model、--lean、--max-iter、--out-dir 可覆盖环境配置。真实检查器先拒绝 sorry/admit 文本，再调用带超时的 Lean 子进程；--stub 无需密钥或 Lean。"
         }
       },
       {
@@ -221,7 +228,7 @@
           "en": "Run these commands from the repository root after installation. Replace paths for your own data.",
           "zh": "安装后在仓库根目录运行以下命令；处理自己的数据时替换相应路径。"
         },
-        "code": "proofloop prove \"sum of the first n natural numbers\" --stub --trace --out-dir demo-output\n# With a configured API key and Lean executable:\nproofloop prove \"sum of the first n natural numbers\" --trace --max-iter 8 --out-dir proof-output"
+        "code": "proofloop prove \"sum of the first n natural numbers\" --stub --trace --out-dir demo-output\n# Convergence benchmark over the bundled claims library (offline demo):\nproofloop bench --stub --out-dir bench-output\n# With a configured API key and Lean executable:\nproofloop prove \"sum of the first n natural numbers\" --trace --max-iter 8 --out-dir proof-output"
       }
     ]
   }

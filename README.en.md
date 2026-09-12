@@ -41,6 +41,14 @@ The CLI resolves the model and checker. co_iterate parses fenced Python/Lean dra
 
 ## Install and quickstart
 
+Zero-config first look at the full co-iteration loop (no API key, no Lean, no clone):
+
+```bash
+uvx --from git+https://github.com/SuperMarioYL/proofloop proofloop prove "sum of the first n naturals = n(n+1)/2" --trace --stub
+```
+
+> Note: PyPI's `proofloop` name belongs to an unrelated project (no CLI) — always use the `--from git+...` form above to install this product.
+
 Use the runtime version declared in the repository manifest. The source installation below makes the included example reproducible.
 
 ```bash
@@ -93,13 +101,15 @@ Run these commands from the repository root after installation. Replace paths fo
 
 ```bash
 proofloop prove "sum of the first n natural numbers" --stub --trace --out-dir demo-output
+# Convergence benchmark over the bundled claims library (offline harness demo):
+proofloop bench --stub --out-dir bench-output
 # With a configured API key and Lean executable:
 proofloop prove "sum of the first n natural numbers" --trace --max-iter 8 --out-dir proof-output
 ```
 
 ## Configuration
 
-Set PROOFLOOP_API_KEY (or OPENAI_API_KEY), PROOFLOOP_BASE_URL, PROOFLOOP_MODEL and PROOFLOOP_LEAN for the real path; --base-url, --model and --lean override them. Use explicit --max-iter and --out-dir: the current CLI defaults can take precedence over their environment settings. The real checker rejects sorry/admit text before invoking Lean and has a subprocess timeout. --stub needs neither key nor Lean.
+Set PROOFLOOP_API_KEY (or OPENAI_API_KEY), PROOFLOOP_BASE_URL, PROOFLOOP_MODEL, PROOFLOOP_LEAN, PROOFLOOP_MAX_ITER and PROOFLOOP_OUT_DIR for the real path; --base-url, --model, --lean, --max-iter and --out-dir override their environment settings. The real checker rejects sorry/admit text before invoking Lean and has a subprocess timeout. --stub needs neither key nor Lean.
 
 ## Integrations and responsibilities
 
@@ -126,7 +136,7 @@ Choose the input and output route that matches your workflow. The local example 
 - Even a real Lean acceptance checks the Lean statement, not equivalence of the Python program or fidelity to the natural-language claim. Review theorem assumptions and generated code.
 - The CLI writes a certificate on exhaustion and does not necessarily return a nonzero status for an unproved claim. Inspect proof_passed, model and lean_version.
 
-Stronger code-to-theorem linkage, broader theorem fixtures and separately verified Lean environments remain useful next steps.
+Stronger code-to-theorem linkage, cross-model live convergence data and separately verified Lean environments remain useful next steps. As of v0.2 the repository ships a 10-theorem claims library ([examples/library.jsonl](./examples/library.jsonl), reference proofs machine-checked on Lean 4.10.0 at build time) and `proofloop bench` for per-run convergence leaderboards (leaderboard.json is generated per run; no LLM benchmark numbers are curated in the repo).
 
 ## License and contributions
 

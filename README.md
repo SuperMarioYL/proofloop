@@ -41,6 +41,14 @@ CLI 解析模型与检查器配置；co_iterate 从代码块读取 Python/Lean �
 
 ## 安装与快速上手
 
+零配置先看一眼完整的 co-iteration 循环（无需 API key、无需 Lean、无需克隆仓库）：
+
+```bash
+uvx --from git+https://github.com/SuperMarioYL/proofloop proofloop prove "sum of the first n naturals = n(n+1)/2" --trace --stub
+```
+
+> 注意：PyPI 上的 `proofloop` 名字属于另一个无关项目（没有 CLI），必须用上面的 `--from git+...` 形式安装本产品。
+
 使用仓库清单声明的运行时版本。以下源码安装步骤可复现随仓示例。
 
 ```bash
@@ -93,13 +101,15 @@ The stub records a rejected attempt followed by simulated acceptance, and writes
 
 ```bash
 proofloop prove "sum of the first n natural numbers" --stub --trace --out-dir demo-output
+# 对内置定理库跑收敛基准（--stub 为离线 harness 演示）：
+proofloop bench --stub --out-dir bench-output
 # With a configured API key and Lean executable:
 proofloop prove "sum of the first n natural numbers" --trace --max-iter 8 --out-dir proof-output
 ```
 
 ## 配置
 
-真实路径设置 PROOFLOOP_API_KEY（或 OPENAI_API_KEY）、PROOFLOOP_BASE_URL、PROOFLOOP_MODEL 与 PROOFLOOP_LEAN；--base-url、--model、--lean 可覆盖。次数与输出目录应显式用 --max-iter、--out-dir，当前 CLI 默认值可能优先于对应环境配置。真实检查器先拒绝 sorry/admit 文本，再调用带超时的 Lean 子进程；--stub 无需密钥或 Lean。
+真实路径设置 PROOFLOOP_API_KEY（或 OPENAI_API_KEY）、PROOFLOOP_BASE_URL、PROOFLOOP_MODEL、PROOFLOOP_LEAN、PROOFLOOP_MAX_ITER 与 PROOFLOOP_OUT_DIR；命令行 --base-url、--model、--lean、--max-iter、--out-dir 可覆盖对应环境配置。真实检查器先拒绝 sorry/admit 文本，再调用带超时的 Lean 子进程；--stub 无需密钥或 Lean。
 
 ## 集成与职责分工
 
@@ -126,7 +136,7 @@ proofloop prove "sum of the first n natural numbers" --trace --max-iter 8 --out-
 - 即使真实 Lean 接受，也只检查 Lean 命题，不证明 Python 程序等价或自然语言需求被忠实表达；须检查定理假设与生成代码。
 - 迭代耗尽后 CLI 仍写证书，未证明的命题不一定导致非零退出；应检查 proof_passed、model 与 lean_version。
 
-更强的代码与定理关联、更多定理 fixture 与独立验证的 Lean 环境是后续方向。
+更强的代码与定理关联、跨模型 live 收敛数据与独立验证的 Lean 环境是后续方向。v0.2 起随仓提供 10 条经典定理的 claims 库（[examples/library.jsonl](./examples/library.jsonl)，参考证明在构建时经 Lean 4.10.0 机器检查）与 `proofloop bench` 收敛基准（每次运行生成 leaderboard.json，不在仓库内维护 LLM 跑分数据）。
 
 ## 许可与贡献
 

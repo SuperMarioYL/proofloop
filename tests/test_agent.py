@@ -220,6 +220,29 @@ def test_config_max_iter_falls_back_on_garbage(monkeypatch: pytest.MonkeyPatch) 
 
 # --- LeanChecker unavailable path ----------------------------------------
 
+class _UnavailableLean:
+    """Oracle that cannot run at all (e.g. the lean binary is missing)."""
+
+    def check(self, proof: str) -> lean.LeanResult:
+        return lean.LeanResult(
+            ok=False, stderr="lean not found at 'x'", version="", available=False
+        )
+
+
+def test_co_iterate_stops_when_oracle_unavailable() -> None:
+    # A repair cannot install a toolchain: the loop must stop after recording
+    # the first attempt instead of burning max_iter LLM calls on the same
+    # "lean not found" diagnostic (v0.1.0 ran 1 generate + 7 repairs here).
+    llm = _FakeLLM([_GOOD])
+    cert = agent.co_iterate(
+        "a claim", llm=llm, lean=_UnavailableLean(), max_iterations=8
+    )
+    assert cert.proof_passed is False
+    assert len(cert.iterations) == 1
+    assert llm.repair_calls == 0
+    assert "not found" in cert.iterations[0].lean_stderr
+
+
 def test_lean_checker_reports_unavailable_for_missing_binary() -> None:
     # A path guaranteed not to exist on PATH, so the check short-circuits to
     # "lean not found" regardless of whether Lean is installed on the host.
